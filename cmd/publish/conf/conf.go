@@ -19,7 +19,11 @@ func Init() {
 		log.Panicln(err)
 	}
 
-	json.Unmarshal([]byte(byteValue), &Cfg)
+	err = json.Unmarshal([]byte(byteValue), &Cfg)
+	if err != nil {
+		log.Println("json unmarshal error")
+		return
+	}
 
 	log.Println(Cfg)
 

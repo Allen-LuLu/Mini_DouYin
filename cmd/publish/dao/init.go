@@ -1,6 +1,7 @@
 package dao
 
-// Initialize mysql and other services
+// Initdb Initialize mysql and other services
 func Initdb() {
 	InitMysql()
+	InitTencentCloud()
 }

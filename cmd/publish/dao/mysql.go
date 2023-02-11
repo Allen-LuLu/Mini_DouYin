@@ -44,7 +44,7 @@ func AddVideo(authId int64, title string, playURL string, coverURL string) (*mod
 	//Create row
 	err := mysqlClient.Create(video).Error
 	if err != nil {
-		log.Printf("Save video %v failed\n", playURL)
+		log.Printf("Save video %v to mysql failed\n", playURL)
 		return nil, err
 	}
 

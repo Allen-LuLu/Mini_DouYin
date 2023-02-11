@@ -11,11 +11,15 @@ type PublishImpl struct{}
 // Action implements the PublishImpl interface.
 func (s *PublishImpl) Action(ctx context.Context, req *publish.ActionReq) (resp *publish.ActionResp, err error) {
 	// TODO: Your code here...
+	// TODO: Save file to local temporally
+	// INFO: filename should be /tmp/
+	ctx.Get(IdenityKey)
 	return
 }
 
 // List implements the PublishImpl interface.
 func (s *PublishImpl) List(ctx context.Context, req *publish.ListReq) (resp *publish.ListResp, err error) {
 	// TODO: Your code here...
+
 	return
 }
