@@ -3,9 +3,13 @@
 package api
 
 import (
+	"Mini_DouYin/cmd/api/biz/dao"
+	"Mini_DouYin/cmd/api/biz/mw"
 	"Mini_DouYin/cmd/api/biz/rpc"
+	"Mini_DouYin/common/consts/errmsg"
 	"Mini_DouYin/kitex_gen/user"
 	"context"
+	"time"
 
 	api "Mini_DouYin/cmd/api/biz/model/api"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -15,8 +19,8 @@ import (
 // UserRegister .
 // @router /douyin/user/register/ [POST]
 func UserRegister(ctx context.Context, c *app.RequestContext) {
-	var err error
 	var req api.RegisterReq
+	var err error
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
@@ -24,7 +28,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(api.RegisterResp)
-	rgResp, err := rpc.Register(ctx, &user.RegisterReq{
+	rgResp, err := rpc.Register(ctx, &user.RegisterReq{ // rpc调用服务进行注册
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -43,10 +47,18 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+
+	token,expire,err := mw.GenToken(rgResp.UserID) // 生成token
+	if err != nil {
+		resp.StatusCode = consts.StatusInternalServerError
+		resp.StatusMsg = errmsg.GENTOKENFAILED
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	dao.StoreToken(rgResp.UserID,token,expire.Sub(time.Now())) // 存储token
+
 	resp.UserID = rgResp.UserID
-	resp.Token = rgResp.Token
-	resp.StatusMsg = "ok"
-	resp.StatusCode = consts.StatusOK
+	resp.Token = token
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -54,38 +66,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 // UserLogin .
 // @router /douyin/user/login/ [POST]
 func UserLogin(ctx context.Context, c *app.RequestContext) {
-	var err error
-	var req api.LoginReq
-	err = c.BindAndValidate(&req)
-	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
-		return
-	}
-
-	resp := new(api.LoginResp)
-	lgResp, err := rpc.Login(ctx, &user.LoginReq{
-		Username: req.Username,
-		Password: req.Password,
-	})
-
-	if err != nil {
-		resp.StatusCode = consts.StatusInternalServerError
-		resp.StatusMsg = err.Error()
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	if lgResp.Base.Code != consts.StatusOK{
-		resp.StatusCode = lgResp.Base.Code
-		resp.StatusMsg = lgResp.Base.Errmsg
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	resp.UserID = lgResp.UserID
-	resp.Token = lgResp.Token
-
-	c.JSON(consts.StatusOK, resp)
+	mw.JwtMiddleware.LoginHandler(ctx,c)  // 调用jwt中间函数提供的登录路由功能，该函数会在登陆的时候去调用在mw中定义的Authenticator登录校验函数
 }
 
 // GetUserInfo .
@@ -102,8 +83,7 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	resp := new(api.UserInfoResp)
 	resp.User = new(api.User)
 	infoResp, err := rpc.GetUserInfo(ctx, &user.UserInfoReq{
-		UserID: req.UserID,
-		Token: req.Token,
+		UserIDS: []int64{req.UserID},
 	})
 
 	if err != nil {
@@ -120,10 +100,12 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp.User.ID = infoResp.User.Id
-	resp.User.Name =  infoResp.User.Name
-	resp.User.FollowCount =  infoResp.User.FollowCount
-	resp.User.FollowerCount =  infoResp.User.FollowerCount
+	user := infoResp.Users[0]
+
+	resp.User.ID = user.Id
+	resp.User.Name =  user.Name
+	resp.User.FollowCount =  user.FollowCount
+	resp.User.FollowerCount =  user.FollowerCount
 	resp.User.IsFollow = true
 	c.JSON(consts.StatusOK, resp)
 }

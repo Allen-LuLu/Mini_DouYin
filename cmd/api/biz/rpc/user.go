@@ -15,7 +15,6 @@ import (
 
 var userClient userservice.Client
 
-// initUser user服务rpc客户端初始化
 func initUser(){
 	r,err := etcd.NewEtcdResolver([]string{conf.Cfg.EtcdCfg.Addr})
 	if err != nil {
@@ -37,7 +36,6 @@ func initUser(){
 	userClient = c
 }
 
-// Register 注册服务
 func Register(ctx context.Context,req *user.RegisterReq)(*user.RegisterResp,error){
 	resp,err := userClient.Register(ctx,req)
 	if err != nil {
@@ -47,9 +45,8 @@ func Register(ctx context.Context,req *user.RegisterReq)(*user.RegisterResp,erro
 	return resp,nil
 }
 
-// Login 登录服务
-func Login(ctx context.Context,req *user.LoginReq)(*user.LoginResp,error){
-	resp,err := userClient.Login(ctx,req)
+func CheckUser(ctx context.Context,req *user.CheckUserReq)(*user.CheckUserResp,error){
+	resp,err := userClient.CheckUser(ctx,req)
 	if err != nil {
 		log.Println("rpc login failed")
 		return nil,err
@@ -57,7 +54,6 @@ func Login(ctx context.Context,req *user.LoginReq)(*user.LoginResp,error){
 	return resp,nil
 }
 
-// GetUserInfo 获取用户信息服务
 func GetUserInfo(ctx context.Context,req *user.UserInfoReq)(*user.UserInfoResp,error){
 	resp,err := userClient.UserInfo(ctx,req)
 	if err != nil {

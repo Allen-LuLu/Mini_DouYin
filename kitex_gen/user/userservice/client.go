@@ -12,7 +12,7 @@ import (
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
 	Register(ctx context.Context, req *user.RegisterReq, callOptions ...callopt.Option) (r *user.RegisterResp, err error)
-	Login(ctx context.Context, req *user.LoginReq, callOptions ...callopt.Option) (r *user.LoginResp, err error)
+	CheckUser(ctx context.Context, req *user.CheckUserReq, callOptions ...callopt.Option) (r *user.CheckUserResp, err error)
 	UserInfo(ctx context.Context, req *user.UserInfoReq, callOptions ...callopt.Option) (r *user.UserInfoResp, err error)
 }
 
@@ -50,9 +50,9 @@ func (p *kUserServiceClient) Register(ctx context.Context, req *user.RegisterReq
 	return p.kClient.Register(ctx, req)
 }
 
-func (p *kUserServiceClient) Login(ctx context.Context, req *user.LoginReq, callOptions ...callopt.Option) (r *user.LoginResp, err error) {
+func (p *kUserServiceClient) CheckUser(ctx context.Context, req *user.CheckUserReq, callOptions ...callopt.Option) (r *user.CheckUserResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.Login(ctx, req)
+	return p.kClient.CheckUser(ctx, req)
 }
 
 func (p *kUserServiceClient) UserInfo(ctx context.Context, req *user.UserInfoReq, callOptions ...callopt.Option) (r *user.UserInfoResp, err error) {

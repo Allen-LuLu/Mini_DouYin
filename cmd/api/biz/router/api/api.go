@@ -4,6 +4,7 @@ package Api
 
 import (
 	api "Mini_DouYin/cmd/api/biz/handler/api"
+	"Mini_DouYin/cmd/api/biz/mw"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
@@ -21,7 +22,7 @@ func Register(r *server.Hertz) {
 		_douyin := root.Group("/douyin", _douyinMw()...)
 		{
 			_user := _douyin.Group("/user", _userMw()...)
-			_user.GET("/", append(_getuserinfoMw(), api.GetUserInfo)...)
+			_user.GET("/", append(_getuserinfoMw(), mw.JwtMiddleware.MiddlewareFunc(),api.GetUserInfo)...) // 在此处为/douyin/user/添加jwt鉴权中间件
 			{
 				_login := _user.Group("/login", _loginMw()...)
 				_login.POST("/", append(_userloginMw(), api.UserLogin)...)

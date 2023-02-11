@@ -12,19 +12,16 @@ struct RegisterReq{
 
 struct RegisterResp{
     1:i64 userID
-    2:string token
     3:BaseResp base
 }
 
-struct LoginReq{
+struct CheckUserReq{
     1:string username
     2:string password
 }
 
-struct LoginResp{
+struct CheckUserResp{
     1:i64 userID
-    2:string token
-    3:BaseResp base
 }
 
 struct User{
@@ -35,17 +32,16 @@ struct User{
 }
 
 struct UserInfoReq{
-    1:i64 userID
-    2:string token
+    1:list<i64> userIDS
 }
 
 struct UserInfoResp{
-    1:User user
+    1:list<User> users
     2:BaseResp base
 }
 
 service UserService{
-    RegisterResp Register(1:RegisterReq req)  // 用户注册接口
-    LoginResp Login(1:LoginReq req)  //用户登录接口
-    UserInfoResp UserInfo(1:UserInfoReq req) //获取用户信息接口
+    RegisterResp Register(1:RegisterReq req)
+    CheckUserResp CheckUser(1:CheckUserReq req)
+    UserInfoResp UserInfo(1:UserInfoReq req)
 }
