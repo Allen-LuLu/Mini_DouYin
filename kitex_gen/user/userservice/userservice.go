@@ -19,9 +19,9 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserService"
 	handlerType := (*user.UserService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"Register": kitex.NewMethodInfo(registerHandler, newUserServiceRegisterArgs, newUserServiceRegisterResult, false),
-		"Login":    kitex.NewMethodInfo(loginHandler, newUserServiceLoginArgs, newUserServiceLoginResult, false),
-		"UserInfo": kitex.NewMethodInfo(userInfoHandler, newUserServiceUserInfoArgs, newUserServiceUserInfoResult, false),
+		"Register":  kitex.NewMethodInfo(registerHandler, newUserServiceRegisterArgs, newUserServiceRegisterResult, false),
+		"CheckUser": kitex.NewMethodInfo(checkUserHandler, newUserServiceCheckUserArgs, newUserServiceCheckUserResult, false),
+		"UserInfo":  kitex.NewMethodInfo(userInfoHandler, newUserServiceUserInfoArgs, newUserServiceUserInfoResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "user",
@@ -55,22 +55,22 @@ func newUserServiceRegisterResult() interface{} {
 	return user.NewUserServiceRegisterResult()
 }
 
-func loginHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	realArg := arg.(*user.UserServiceLoginArgs)
-	realResult := result.(*user.UserServiceLoginResult)
-	success, err := handler.(user.UserService).Login(ctx, realArg.Req)
+func checkUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceCheckUserArgs)
+	realResult := result.(*user.UserServiceCheckUserResult)
+	success, err := handler.(user.UserService).CheckUser(ctx, realArg.Req)
 	if err != nil {
 		return err
 	}
 	realResult.Success = success
 	return nil
 }
-func newUserServiceLoginArgs() interface{} {
-	return user.NewUserServiceLoginArgs()
+func newUserServiceCheckUserArgs() interface{} {
+	return user.NewUserServiceCheckUserArgs()
 }
 
-func newUserServiceLoginResult() interface{} {
-	return user.NewUserServiceLoginResult()
+func newUserServiceCheckUserResult() interface{} {
+	return user.NewUserServiceCheckUserResult()
 }
 
 func userInfoHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
@@ -111,11 +111,11 @@ func (p *kClient) Register(ctx context.Context, req *user.RegisterReq) (r *user.
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) Login(ctx context.Context, req *user.LoginReq) (r *user.LoginResp, err error) {
-	var _args user.UserServiceLoginArgs
+func (p *kClient) CheckUser(ctx context.Context, req *user.CheckUserReq) (r *user.CheckUserResp, err error) {
+	var _args user.UserServiceCheckUserArgs
 	_args.Req = req
-	var _result user.UserServiceLoginResult
-	if err = p.c.Call(ctx, "Login", &_args, &_result); err != nil {
+	var _result user.UserServiceCheckUserResult
+	if err = p.c.Call(ctx, "CheckUser", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

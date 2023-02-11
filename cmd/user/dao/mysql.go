@@ -78,12 +78,18 @@ func CheckUser(username string,password string)(int64,error){
 }
 
 // GetUserByID 通过用户ID获取用户信息
-func GetUserByID(userID int64)(*model.User,error){
-	var user model.User
-	err := mysqlClient.Model(&model.User{}).Where("user_id=?",userID).First(&user).Error
-	if err != nil {
-		return nil,err
+func GetUserByID(userIDS []int64)([]*model.User,error){
+	var users []*model.User
+
+	for _,userID := range userIDS{
+		user := new(model.User)
+		err := mysqlClient.Model(&model.User{}).Where("user_id=?",userID).First(user).Error
+		if err != nil {
+			return nil,err
+		}
+		users = append(users,user)
 	}
-	return &user,nil
+
+	return users,nil
 }
 
